@@ -72,5 +72,5 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ runner.os }}-package-commit-$GITHUB_SHA
-          path: ${{github.workspace}}/_packages/projectn?.zip
+          path: ${{github.workspace}}/_packages/projectn*.zip
           if-no-files-found: error
