@@ -63,7 +63,7 @@ jobs:
       - name: Configure CMake
         run: |
           cd ${{github.workspace}}
-          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_SYSTEM_INCLUDE_PATH=${{github.workspace}}/sdk_build/
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DAWSSDK_DIR=${{github.workspace}}/sdk_build/
 
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
