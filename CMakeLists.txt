@@ -4,7 +4,8 @@ endif()
 
 cmake_minimum_required(VERSION 3.21)
 
-set(OWN_VERSION 1.0.0)
+# Same as aws-sdk-cpp
+set(OWN_VERSION 1.11.0)
 
 set(namespace "projectn")
 project(

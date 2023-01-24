@@ -43,9 +43,14 @@ The prebuilt packages are built with [cpack](https://cmake.org/cmake/help/latest
 cpack -G ZIP
 ```
 
-
 ## Git Submodule
 
 ```bash
 git submodule update --init --recursive
 ```
+
+## New Release
+
+To create a new release, update the aws sumbodule using [./update_aws_sdk_submodule.sh](./update_aws_sdk_submodule.sh) and change the version number in [CMakeLists.txt](CMakeLists.txt) to the same version as the one used for the aws sdk.
+
+You can then commit/push and use the release action in github to create a release.
