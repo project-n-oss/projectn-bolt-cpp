@@ -9,6 +9,22 @@ on:
 jobs:
   release-build:
     uses: ./.github/workflows/build.yml
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/download-artifact@v3
+
+    - name: Display structure of downloaded files
+      run: ls -R
+
+    # - uses: ncipollo/release-action@v1
+    #   with:
+    #     tag: ${{ input.version }}
+    #     artifacts: ${{github.workspace}}/artifacts/*.zip
 
 
       
