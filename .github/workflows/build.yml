@@ -30,7 +30,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get install -y libcurl4-openssl-dev libssl-dev uuid-dev zlib1g-dev libpulse-dev
 
-      - name: git checkout
+      - name: git checkout aws sdk
         run: |
           git clone --recurse-submodules https://github.com/aws/aws-sdk-cpp
           cd ./aws-sdk-cpp && git checkout  ${{ matrix.aws-sdk-commit-hash }}
@@ -41,11 +41,20 @@ jobs:
           path: ${{github.workspace}}/sdk_build
           key: ${{ runner.os }}-aws-sdk-cpp-commit-${{ matrix.aws-sdk-commit-hash}}
 
+      - name: Checkout and build aws-sdk-cpp
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          git clone --recurse-submodules https://github.com/aws/aws-sdk-cpp
+          cd ${{github.workspace}}/aws-sdk-cpp && git checkout  ${{ matrix.aws-sdk-commit-hash }}
+          mkdir ${{github.workspace}}/sdk_build
+          cd ${{github.workspace}}/sdk_build
+          cmake ../aws-sdk-cpp -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local/ -DCMAKE_INSTALL_PREFIX=/usr/local/ -DBUILD_ONLY="s3"
+          make
+
       - name: Build and install aws-sdk-cpp
         run: |
-          cmake -B ${{github.workspace}}/sdk_build  -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=/usr/local/ -DCMAKE_INSTALL_PREFIX=/usr/local/ -DBUILD_ONLY="s3"
-          make -B ${{github.workspace}}/sdk_build
-          make install -B ${{github.workspace}}/sdk_build
+          cd ${{github.workspace}}/sdk_build
+          make install
 
       - uses: actions/cache/save@v3
         id: cache-save
