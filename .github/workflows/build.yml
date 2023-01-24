@@ -23,10 +23,11 @@ jobs:
         uses: lukka/run-vcpkg@v10
         id: runvcpkg
         with:
+          vcpkgDirectory: '${{ runner.workspace }}/b/vcpkg'
           runVcpkgInstall: true
-          vcpkgGitCommitId: ${{ matrix.VCPKG_COMMIT_ID}}
+          vcpkgGitCommitId: '${{ env.VCPKG_COMMIT_ID}}'
           vcpkgJsonGlob: '**/cmake/vcpkg.json'
-          appendedCacheKey: vcpkginstal
+          appendedCacheKey: vcpkginstall
 
       - name: Prints output of run-vcpkg's action.
         run: echo "root='${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_ROOT_OUT }}', triplet='${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_DEFAULT_TRIPLET_OUT }}' "
