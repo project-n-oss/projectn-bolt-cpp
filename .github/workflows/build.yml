@@ -23,13 +23,12 @@ jobs:
             aws-sdk-commit-hash: f14984af3738e69f197bf0e647a8dca12de92996
           # - os: macos-latest
             # vcpkgCommitId: ''${{ env.VCPKG_COMMIT_ID }}'
+    - uses: ./.github/workflows/aws-sdk-cpp.yml
+        with: 
+          aws-sdk-commit-hash: '${{ matrix.aws-sdk-commit-hash }}'
 
     steps:
       - uses: actions/checkout@v3
-
-      - uses: ./.github/workflows/aws-sdk-cpp.yml
-        with: 
-          aws-sdk-commit-hash: '${{ matrix.aws-sdk-commit-hash }}'
 
       # - name: Configure CMake
       #   run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} 
