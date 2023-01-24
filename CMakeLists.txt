@@ -1,0 +1,20 @@
+cmake_minimum_required(VERSION 3.21)
+
+set(OWN_VERSION 1.0.0)
+
+set(namespace "projectn")
+project(
+    "projectn"
+    VERSION ${OWN_VERSION}
+    DESCRIPTION "projectn sdks for c++"
+)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# for clangd
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+add_subdirectory(bolt)
+
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+include(Packing)
