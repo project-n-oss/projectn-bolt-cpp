@@ -27,10 +27,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: List $RUNNER_WORKSPACE
-        run: find $RUNNER_WORKSPACE
-        shell: bash
-
       - name: vcpkg restore/run
         uses: lukka/run-vcpkg@v10
         id: runvcpkg
@@ -38,7 +34,7 @@ jobs:
           vcpkgDirectory: '${{ runner.workspace }}/b/vcpkg'
           runVcpkgInstall: true
           vcpkgGitCommitId: '${{ matrix.vcpkgCommitId }}'
-          vcpkgJsonGlob: '**/cmake/vcpkg.json'
+          vcpkgJsonGlob: '**/vcpkg.json'
           appendedCacheKey: vcpkginstall
 
       - name: vcpkg output
