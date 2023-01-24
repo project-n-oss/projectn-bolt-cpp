@@ -26,21 +26,28 @@ jobs:
 
 
     steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+
       - name: Linux apt-get
         if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get install -y libcurl4-openssl-dev libssl-dev uuid-dev zlib1g-dev libpulse-dev
+      
+      - name: aws-sdk-cpp commit hash
+        run: |
+          cd ${{github.workspace}}/aws-sdk-cpp
+          echo "AWS_COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_ENV 
 
       - uses: actions/cache/restore@v3
         id: cache
         with:
           path: ${{github.workspace}}/sdk_build
-          key: ${{ runner.os }}-aws-sdk-cpp-commit-${{ matrix.aws-sdk-commit-hash}}
+          key: ${{ runner.os }}-aws-sdk-cpp-commit-${{ env.AWS_COMMIT_HASH }}
 
       - name: Checkout and build aws-sdk-cpp
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          git clone --recurse-submodules https://github.com/aws/aws-sdk-cpp
-          cd ${{github.workspace}}/aws-sdk-cpp && git checkout  ${{ matrix.aws-sdk-commit-hash }}
           mkdir ${{github.workspace}}/sdk_build
           cd ${{github.workspace}}/sdk_build
           cmake ../aws-sdk-cpp -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local/ -DCMAKE_INSTALL_PREFIX=/usr/local/ -DBUILD_ONLY="s3"
@@ -55,7 +62,7 @@ jobs:
         id: cache-save
         with:
           path: ${{github.workspace}}/sdk_build
-          key: ${{ runner.os }}-aws-sdk-cpp-commit-${{ matrix.aws-sdk-commit-hash}}
+          key: ${{ runner.os }}-aws-sdk-cpp-commit-${{ env.AWS_COMMIT_HASH }}
 
       - name: List $RUNNER_WORKSPACE before build
         run: find $RUNNER_WORKSPACE

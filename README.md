@@ -42,3 +42,10 @@ The prebuilt packages are built with [cpack](https://cmake.org/cmake/help/latest
 # inside ./build
 cpack -G ZIP
 ```
+
+
+## Git Submodule
+
+```bash
+git submodule update --init --recursive
+```
