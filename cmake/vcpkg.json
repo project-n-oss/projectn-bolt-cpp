@@ -1,0 +1,10 @@
+{
+  "name": "projectn",
+  "dependencies": [
+    {
+      "name": "aws-sdk-cpp",
+      "default-features": false,
+      "features": ["s3"]
+    }
+  ]
+}

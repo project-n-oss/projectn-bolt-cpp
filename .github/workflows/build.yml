@@ -7,6 +7,7 @@ on:
 
 env:
   BUILD_TYPE: Release
+  VCPKG_COMMIT_ID: 253704407ae68efa37bf8f5b59b3e06dd40d3d3f
 
 jobs:
   build:
@@ -36,4 +37,8 @@ jobs:
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
 
+      - name: Configure CMake
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
