@@ -7,8 +7,8 @@ on:
         required: true
 
 jobs:
-  release_build:
-    - uses: ./.github/workflows/build.yml
+  release-build:
+    uses: ./.github/workflows/build.yml
 
 
       
