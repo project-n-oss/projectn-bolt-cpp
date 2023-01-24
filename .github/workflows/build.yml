@@ -54,23 +54,14 @@ jobs:
           make
           make install
 
-      # - name: Install aws-sdk-cpp
-      #   run: |
-      #     cd ${{github.workspace}}/sdk_build
-      #     make install
-
       - uses: actions/cache/save@v3
         id: cache-save
         with:
           path: ${{github.workspace}}/sdk_build
           key: ${{ runner.os }}-aws-sdk-cpp-commit-${{ env.AWS_COMMIT_HASH }}
 
-      - name: List $RUNNER_WORKSPACE before build
-        run: find $RUNNER_WORKSPACE
-        shell: bash
+      - name: Configure CMake
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_SYSTEM_INCLUDE_PATH= ${{github.workspace}}/sdk_build
 
-      # - name: Configure CMake
-      #   run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} 
-
-      # - name: Build
-      #   run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
