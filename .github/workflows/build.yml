@@ -61,7 +61,9 @@ jobs:
           key: ${{ runner.os }}-aws-sdk-cpp-commit-${{ env.AWS_COMMIT_HASH }}
 
       - name: Configure CMake
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_SYSTEM_INCLUDE_PATH= ${{github.workspace}}/sdk_build
+        run: |
+          cd ${{github.workspace}}
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_SYSTEM_INCLUDE_PATH= ${{github.workspace}}/sdk_build
 
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
