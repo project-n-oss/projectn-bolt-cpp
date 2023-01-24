@@ -1,3 +1,4 @@
+![projectn.png](./projectn.png)
 # projectn-bolt-cpp
 
 This repository provides bolt client sdk libraries for projectn.
