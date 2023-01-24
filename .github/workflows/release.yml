@@ -1,10 +1,6 @@
 name: Release
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: "Version"
-        required: true
 
 jobs:
   release-build:
@@ -19,13 +15,13 @@ jobs:
 
     - uses: actions/download-artifact@v3
 
-    - name: Display structure of downloaded files
-      run: ls -R
+    - name: Get tag version
+      run: echo VERSION=`awk '/OWN_VERSION/ {$2; sub(/\)$/, "", $2); print $2; exit}' CMakeLists.txt` >> $GITHUB_ENV 
 
-    # - uses: ncipollo/release-action@v1
-    #   with:
-    #     tag: ${{ input.version }}
-    #     artifacts: ${{github.workspace}}/artifacts/*.zip
+    - uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ env.VERSION }}
+        artifacts: ${{github.workspace}}/artifact/*.zip
 
 
       
