@@ -45,18 +45,19 @@ jobs:
           path: ${{github.workspace}}/sdk_build
           key: ${{ runner.os }}-aws-sdk-cpp-commit-${{ env.AWS_COMMIT_HASH }}
 
-      - name: Checkout and build aws-sdk-cpp
+      - name: Build aws-sdk-cpp
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           mkdir ${{github.workspace}}/sdk_build
           cd ${{github.workspace}}/sdk_build
-          cmake ../aws-sdk-cpp -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local/ -DCMAKE_INSTALL_PREFIX=/usr/local/ -DBUILD_ONLY="s3"
+          cmake ../aws-sdk-cpp -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${{github.workspace}}/sdk_build/ -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/sdk_build/ -DBUILD_ONLY="s3"
           make
-
-      - name: Build and install aws-sdk-cpp
-        run: |
-          cd ${{github.workspace}}/sdk_build
           make install
+
+      # - name: Install aws-sdk-cpp
+      #   run: |
+      #     cd ${{github.workspace}}/sdk_build
+      #     make install
 
       - uses: actions/cache/save@v3
         id: cache-save
