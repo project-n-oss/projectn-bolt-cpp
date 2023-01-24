@@ -30,11 +30,6 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get install -y libcurl4-openssl-dev libssl-dev uuid-dev zlib1g-dev libpulse-dev
 
-      - name: git checkout aws sdk
-        run: |
-          git clone --recurse-submodules https://github.com/aws/aws-sdk-cpp
-          cd ./aws-sdk-cpp && git checkout  ${{ matrix.aws-sdk-commit-hash }}
-
       - uses: actions/cache/restore@v3
         id: cache
         with:
