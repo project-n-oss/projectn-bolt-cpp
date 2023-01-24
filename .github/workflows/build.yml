@@ -24,7 +24,7 @@ jobs:
         id: runvcpkg
         with:
           runVcpkgInstall: true
-          vcpkgGitCommitId: '${{ matrix.VCPKG_COMMIT_ID}}'
+          vcpkgGitCommitId: ${{ matrix.VCPKG_COMMIT_ID}}
           vcpkgJsonGlob: '**/cmake/vcpkg.json'
           appendedCacheKey: vcpkginstal
 
