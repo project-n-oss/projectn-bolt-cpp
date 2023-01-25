@@ -1,9 +1,0 @@
-{
-  "name": "projectn",
-  "dependencies": [
-    {
-      "name": "aws-sdk-cpp",
-      "features": ["s3"]
-    }
-  ]
-}
