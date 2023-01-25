@@ -8,3 +8,6 @@ echo "Checking out tag..."
 cd aws-sdk-cpp
 git checkout $TAG
 cd ..
+
+echo "Updating CMakeLists.txt project version"
+perl -i -pe "s/^set\(OWN_VERSION.*/set\(OWN_VERSION $TAG\)/" CMakeLists.txt

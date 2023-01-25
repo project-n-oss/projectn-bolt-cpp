@@ -39,7 +39,7 @@ cmake --build . --target install --config Release
 The prebuilt packages are built with [cpack](https://cmake.org/cmake/help/latest/module/CPack.html). After building the library with cmake, you can use `cpack` to build your own package like so:
 
 ```bash
-# inside ./build
+# cd ./build
 cpack -G ZIP
 ```
 
@@ -49,8 +49,11 @@ cpack -G ZIP
 git submodule update --init --recursive
 ```
 
-## New Release
+## Creating New Release
 
-To create a new release, update the aws sumbodule using [./update_aws_sdk_submodule.sh](./update_aws_sdk_submodule.sh) and change the version number in [CMakeLists.txt](CMakeLists.txt) to the same version as the one used for the aws sdk.
+We follow the same release versioning as aws-sdk-cpp.
 
-You can then commit/push and use the release action in github to create a release.
+### Steps
+
+1. run `./update_version.sh` and give the aws-sdk-cpp version you want to update too. (This will checkout the correct version of the aws-sdk-cpp submodule and update the projectn cmake project to the same version)
+2. git commit/push and run the `Release` Action on githu
