@@ -34,6 +34,8 @@ target_sources(
     ${PROJECT_NAME}
     PRIVATE
         src/bolt_s3_client.cpp
+        src/bolt_s3_config.cpp
+        src/bolt_s3_http_client_factory.cpp
 
 )
 
@@ -51,7 +53,9 @@ target_include_directories(${PROJECT_NAME}
 # without it public headers won't get installed
 set(
     public_headers
+    include/bolt_s3_config.h
     include/bolt_s3_client.h
+    include/bolt_s3_http_client_factory.h
 )
 
 #Set the location of where Windows can find the installed libraries of the SDK.
@@ -61,6 +65,19 @@ if(MSVC)
 endif()
 find_package(AWSSDK REQUIRED COMPONENTS s3)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${AWSSDK_LINK_LIBRARIES})
+
+include(FetchContent)
+FetchContent_Declare(cpr GIT_REPOSITORY https://github.com/libcpr/cpr.git
+                         GIT_TAG a2d35a1cb9f3f7e2f1469d6a189751331dc99f96) 
+FetchContent_MakeAvailable(cpr)
+target_link_libraries(${PROJECT_NAME} PRIVATE cpr::cpr)
+
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
+FetchContent_MakeAvailable(json)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
+
+set(EXTRA_TARGETS cpr nlohmann_json)
 
 
 # not for MSVC

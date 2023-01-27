@@ -14,12 +14,13 @@ project(
     DESCRIPTION "projectn sdks for c++"
 )
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # for clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(bolt)
+add_subdirectory(example)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 include(Packing)

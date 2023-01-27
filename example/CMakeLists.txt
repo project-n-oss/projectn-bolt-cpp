@@ -2,15 +2,13 @@ cmake_minimum_required(VERSION 3.15)
 
 project(
     "bolt-sdk-example"
-    VERSION 0.9 
+    VERSION 1.0 
     DESCRIPTION "Example project using the bolt-sdk"
 )
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_PREFIX_PATH "../install")
-find_package(bolt CONFIG REQUIRED)
 
 #Set the location of where Windows can find the installed libraries of the SDK.
 if(MSVC)
@@ -45,4 +43,4 @@ endif()
 
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ${AWSSDK_LINK_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} PRIVATE projectn::bolt)
+target_link_libraries(${PROJECT_NAME} PRIVATE bolt)

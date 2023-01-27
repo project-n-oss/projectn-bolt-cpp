@@ -28,7 +28,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "d")
 
 # install the target and create export-set
 install(
-    TARGETS ${PROJECT_NAME}
+    TARGETS ${PROJECT_NAME} ${EXTRA_TARGETS}
     EXPORT "${PROJECT_NAME}Targets"
     COMPONENT ${PROJECT_NAME} # must be here, not any line lower
     # these get default values from GNUInstallDirs, no need to set them
