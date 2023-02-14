@@ -23,6 +23,20 @@ You can look at the [./example](./example) folder to see how to use our library 
 You can build this C++ library from source using the [./build.sh](./build.sh) bash script.
 This will create a new folder `./install` with all of the headers and static library.
 
+### build.sh
+
+flags:
+
+- r) set build type to Release
+- d) set build type to Debug
+- i) create an `install/` target folder
+
+Example to create a release:
+
+```bash
+./build.sh -r -i
+```
+
 ### CMake
 
 You can also use cmake directly to build this library and pass in cmake arguments like `-DBUILD_SHARED_LIBS=1`:

@@ -68,7 +68,7 @@ jobs:
       - name: CPack
         run: |
           cd ${{github.workspace}}/build
-          cpack -G ZIP
+          sudo cpack -G ZIP
       
       - uses: actions/upload-artifact@v3
         with:
