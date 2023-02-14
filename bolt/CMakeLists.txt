@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.21)
 
+# where to find our CMake modules
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
 set(OWN_VERSION 1.0.1)
 if(DEFINED CMAKE_PROJECT_VERSION AND NOT "${CMAKE_PROJECT_VERSION}" STREQUAL "")
     set(OWN_VERSION ${CMAKE_PROJECT_VERSION})
@@ -35,8 +38,7 @@ target_sources(
     PRIVATE
         src/bolt_s3_client.cpp
         src/bolt_s3_config.cpp
-        src/bolt_s3_http_client_factory.cpp
-
+        src/bolt_s3_signer.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -55,7 +57,7 @@ set(
     public_headers
     include/bolt_s3_config.h
     include/bolt_s3_client.h
-    include/bolt_s3_http_client_factory.h
+    include/bolt_s3_client_model.h
 )
 
 #Set the location of where Windows can find the installed libraries of the SDK.
@@ -87,7 +89,5 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     target_compile_options(${PROJECT_NAME} PRIVATE -Werror)
 endif()
 
-# where to find our CMake modules
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 include(InstallingGeneral)
 include(InstallingConfigs)

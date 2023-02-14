@@ -3,21 +3,23 @@
 #include <aws/s3/S3Client.h>
 #include <bolt_s3_client.h>
 #include <bolt_s3_config.h>
-#include <bolt_s3_http_client_factory.h>
 
 #include <iostream>
 
 using namespace Aws;
-static const char ALLOCATION_TAG[] = "OverrideDefaultHttpClient";
-
-std::shared_ptr<Aws::Http::HttpClientFactory> CreateFactory() { return Aws::MakeShared<ProjectN::Bolt::BoltS3HttpClientFactory>(ALLOCATION_TAG); }
 
 void ListBuckets() {
   SDKOptions options;
-  options.httpOptions.httpClientFactory_create_fn = CreateFactory;
+  options.loggingOptions.logLevel = Aws::Utils::Logging::LogLevel::Debug;
+
+  ProjectN::Bolt::BoltConfig::region = "us-east-1";
+  ProjectN::Bolt::BoltConfig::customDomain = "example.com";
+  ProjectN::Bolt::BoltConfig::Reset();
+
   InitAPI(options);
   {
     ProjectN::Bolt::BoltS3Client client;
+    // Aws::S3::S3Client client;
 
     auto outcome = client.ListBuckets();
     if (outcome.IsSuccess()) {
@@ -35,8 +37,6 @@ void ListBuckets() {
 }
 
 int main() {
-  std::cout << "hello world"
-            << "\n";
   ListBuckets();
   return 0;
 }

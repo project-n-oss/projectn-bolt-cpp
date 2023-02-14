@@ -20,65 +20,74 @@ namespace ProjectN {
 namespace Bolt {
 
 std::string CreateQuicksilverUrl() {
-  std::string zone_id = BoltConfig::zone_id == std::string() ? "" : "?az=" + BoltConfig::zone_id;
-  return "https://quicksilver." + BoltConfig::region + "." + BoltConfig::custom_domain + "/services/bolt" + zone_id;
+  std::string zoneId = BoltConfig::zoneId == std::string() ? "" : "?az=" + BoltConfig::zoneId;
+  return "https://quicksilver." + BoltConfig::region + "." + BoltConfig::customDomain + "/services/bolt" + zoneId;
 }
 
 // std::string BoltConfig::region = GetEnvVar("AWS_REGION") == std::string() ? Aws::Internal::EC2MetadataClient().GetCurrentRegion() : GetEnvVar("AWS_REGION");
-// std::string BoltConfig::zone_id = GetEnvVar("AWS_ZONE_ID") == std::string() ? Aws::Internal::EC2MetadataClient().GetResource("/placement/availability-zone-id") : GetEnvVar("AWS_ZONE_ID");
+// std::string BoltConfig::zoneId = GetEnvVar("AWS_ZONE_ID") == std::string() ? Aws::Internal::EC2MetadataClient().GetResource("/placement/availability-zone-id") : GetEnvVar("AWS_ZONE_ID");
 std::string BoltConfig::region = GetEnvVar("AWS_REGION");
-std::string BoltConfig::zone_id = GetEnvVar("AWS_ZONE_ID");
-std::string BoltConfig::custom_domain = GetEnvVar("BOLT_CUSTOM_DOMAIN");
-std::string BoltConfig::auth_bucket = GetEnvVar("BOLT_AUTH_BUCKET");
-std::string BoltConfig::user_agent_prefix = GetEnvVar("USER_AGENT_PREFIX") == std::string() ? "projectn/" : GetEnvVar("USER_AGENT_PREFIX");
+std::string BoltConfig::zoneId = GetEnvVar("AWS_ZONE_ID");
+std::string BoltConfig::customDomain = GetEnvVar("BOLT_CUSTOM_DOMAIN");
+std::string BoltConfig::authBucket = GetEnvVar("BOLT_AUTH_BUCKET");
+std::string BoltConfig::userAgentPrefix = GetEnvVar("USER_AGENT_PREFIX") == std::string() ? "projectn/" : GetEnvVar("USER_AGENT_PREFIX");
+std::string BoltConfig::boltHostName = "bolt." + BoltConfig::region + "." + BoltConfig::customDomain;
 
-std::chrono::time_point<std::chrono::system_clock> BoltConfig::refresh_time = std::chrono::system_clock::now() + std::chrono::seconds(120);
-BoltEndpoints BoltConfig::bolt_endpoints = {};
-std::string BoltConfig::quicksilver_url = CreateQuicksilverUrl();
+std::chrono::time_point<std::chrono::system_clock> BoltConfig::refreshTime = std::chrono::system_clock::now() + std::chrono::seconds(120);
+BoltEndpoints BoltConfig::boltEndpoints = {};
+std::string BoltConfig::quicksilverUrl = CreateQuicksilverUrl();
 
-const std::array<Aws::Http::HttpMethod, 2> BoltConfig::http_read_methods = {Aws::Http::HttpMethod::HTTP_GET, Aws::Http::HttpMethod::HTTP_HEAD};
-const std::vector<std::string> BoltConfig::read_order_endpoints = {"main_read_endpoints", "main_write_endpoints", "failover_read_endpoints", "failover_write_endpoints"};
-const std::vector<std::string> BoltConfig::write_order_endpoints = {"main_write_endpoints", "failover_write_endpoints"};
+const std::array<Aws::Http::HttpMethod, 2> BoltConfig::httpReadMethods = {Aws::Http::HttpMethod::HTTP_GET, Aws::Http::HttpMethod::HTTP_HEAD};
+const std::vector<std::string> BoltConfig::readOrderEndpoints = {"main_read_endpoints", "main_write_endpoints", "failover_read_endpoints", "failover_write_endpoints"};
+const std::vector<std::string> BoltConfig::writeOrderEndpoints = {"main_write_endpoints", "failover_write_endpoints"};
+
+void BoltConfig::Reset() {
+  BoltConfig::quicksilverUrl = CreateQuicksilverUrl();
+  BoltConfig::boltHostName = "bolt." + BoltConfig::region + "." + BoltConfig::customDomain;
+}
 
 BoltEndpoints BoltConfig::ExecuteRequest(const std::string& get_url) {
   cpr::Response r = cpr::Get(cpr::Url{get_url});
+  if (r.error.code != cpr::ErrorCode::OK) {
+    throw BoltException(r.error.message);
+  }
   auto j = json::parse(r.text);
   return j.get<BoltEndpoints>();
 }
 
-BoltEndpoints BoltConfig::GetBoltEndpoints(const std::string& err_ip) {
-  if (BoltConfig::quicksilver_url == std::string() || BoltConfig::region == std::string()) {
+BoltEndpoints BoltConfig::GetBoltEndpoints(const std::string& errIp) {
+  if (BoltConfig::quicksilverUrl == std::string() || BoltConfig::region == std::string()) {
     return {};
   }
 
-  std::string request_url = BoltConfig::quicksilver_url;
-  if (err_ip.length() > 0) {
-    request_url += ("&err=" + err_ip);
+  std::string requestUrl = BoltConfig::quicksilverUrl;
+  if (errIp.length() > 0) {
+    requestUrl += ("&err=" + errIp);
   }
 
-  return BoltConfig::ExecuteRequest(request_url);
+  return BoltConfig::ExecuteRequest(requestUrl);
 }
 
-void BoltConfig::RefreshBoltEndpoints(const std::string& err_ip) {
-  BoltConfig::bolt_endpoints = BoltConfig::GetBoltEndpoints(err_ip);
-  BoltConfig::refresh_time = std::chrono::system_clock::now() + std::chrono::seconds(60 + (rand() % 120));
+void BoltConfig::RefreshBoltEndpoints(const std::string& errIp) {
+  BoltConfig::boltEndpoints = BoltConfig::GetBoltEndpoints(errIp);
+  BoltConfig::refreshTime = std::chrono::system_clock::now() + std::chrono::seconds(60 + (rand() % 120));
 }
 
-Aws::Http::URI BoltConfig::SelectBoltEndpoints(const Aws::Http::HttpMethod& http_request_method) {
-  if (std::chrono::system_clock::now() > BoltConfig::refresh_time || BoltConfig::bolt_endpoints.empty()) {
+Aws::Http::URI BoltConfig::SelectBoltEndpoints(const Aws::Http::HttpMethod& httpRequestMethod) {
+  if (std::chrono::system_clock::now() > BoltConfig::refreshTime || BoltConfig::boltEndpoints.empty()) {
     BoltConfig::RefreshBoltEndpoints("");
   }
 
-  auto find_request = std::find(std::begin(BoltConfig::http_read_methods), std::end(BoltConfig::http_read_methods), http_request_method);
-  std::vector<std::string> preferred_order = (find_request != std::end(BoltConfig::http_read_methods)) ? BoltConfig::read_order_endpoints : BoltConfig::write_order_endpoints;
+  auto find_request = std::find(std::begin(BoltConfig::httpReadMethods), std::end(BoltConfig::httpReadMethods), httpRequestMethod);
+  std::vector<std::string> preferredOrder = (find_request != std::end(BoltConfig::httpReadMethods)) ? BoltConfig::readOrderEndpoints : BoltConfig::writeOrderEndpoints;
 
-  for (std::string end_point_key : preferred_order) {
-    auto pos = BoltConfig::bolt_endpoints.find(end_point_key);
-    if (pos != BoltConfig::bolt_endpoints.end()) {
+  for (std::string endPointKey : preferredOrder) {
+    auto pos = BoltConfig::boltEndpoints.find(endPointKey);
+    if (pos != BoltConfig::boltEndpoints.end()) {
       std::vector<std::string> value = pos->second;
       if (value.size() > 0) {
-        auto selected_endpoint = value.at(rand() % value.size());
-        return Aws::Http::URI(selected_endpoint);
+        auto selectedEndpoint = value.at(rand() % value.size());
+        return Aws::Http::URI(selectedEndpoint);
       }
     }
   }

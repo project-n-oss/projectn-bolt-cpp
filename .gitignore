@@ -1,5 +1,7 @@
 .cache
 build
+build-release
 install
 _packages
 temp
+aws_sdk*.log
