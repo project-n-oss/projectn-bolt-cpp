@@ -5,6 +5,8 @@
 namespace ProjectN {
 namespace Bolt {
 
+Aws::Http::URI BoltCurlHttpClient::selectedBoltEndpoint = Aws::Http::URI("127.0.0.1");
+
 BoltCurlHttpClient::BoltCurlHttpClient(const Aws::Client::ClientConfiguration &clientConfig) : Aws::Http::CurlHttpClient(clientConfig){};
 
 void BoltCurlHttpClient::OverrideOptionsOnConnectionHandle(CURL *connectionHandle) const {
