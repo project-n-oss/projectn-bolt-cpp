@@ -10,8 +10,9 @@ namespace Bolt {
 class BoltCurlHttpClient : public Aws::Http::CurlHttpClient {
  public:
   BoltCurlHttpClient(const Aws::Client::ClientConfiguration& clientConfig);
+  //   resolve
 
-  static std::string selectedBoltEndpoint;
+  static Aws::Http::URI selectedBoltEndpoint;
 
  protected:
   void OverrideOptionsOnConnectionHandle(CURL* connectionHandle) const override;

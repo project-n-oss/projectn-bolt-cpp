@@ -70,12 +70,12 @@ bool BoltSigner::SignRequest(Aws::Http::HttpRequest& request, const char* region
   // Head Object URL: https://s3.us-east-2.amazonaws.com/n-auth-dummy/owfr/auth
   // request Uri: http://10.196.135.232
 
-  std::cout << "Path: " << path << "\n";
-  std::cout << "Source Bucket: " << sourceBucket << "\n";
-  std::cout << "Bolt Uri: " << boltURI.GetURIString() << "\n";
-  std::cout << "Head Object URL: " << headObjectURL << "\n";
-  std::cout << "request Uri: " << request.GetUri().GetURIString() << "\n";
-  std::cout << "\n";
+  //   std::cout << "Path: " << path << "\n";
+  //   std::cout << "Source Bucket: " << sourceBucket << "\n";
+  //   std::cout << "Bolt Uri: " << boltURI.GetURIString() << "\n";
+  //   std::cout << "Head Object URL: " << headObjectURL << "\n";
+  //   std::cout << "request Uri: " << request.GetUri().GetURIString() << "\n";
+  //   std::cout << "\n";
 
   this->m_v4Signer->SignRequest(headRequest, region, serviceName, signBody);
 
@@ -97,14 +97,15 @@ bool BoltSigner::SignRequest(Aws::Http::HttpRequest& request, const char* region
     request.SetHeaderValue("x-amz-content-sha256", iamHeaders.at("x-amz-content-sha256"));
   }
 
-  //   request.SetHeaderValue("Host", BoltConfig::boltHostName);
-  BoltCurlHttpClient::selectedBoltEndpoint = boltURI.GetPath();
+  BoltCurlHttpClient::selectedBoltEndpoint = boltURI;
+  std::cout << "GET AUTHORITY: " << boltURI.GetAuthority() << " | " << BoltCurlHttpClient::selectedBoltEndpoint.GetAuthority() << "\n";
 
-  request.SetHeaderValue("X-Bolt-Auth-Prefix", prefix);
-  request.SetHeaderValue("User-Agent", BoltConfig::userAgentPrefix + request.GetHeaderValue("User-Agent"));
+  request.SetHeaderValue("host", BoltConfig::boltHostName);
+  request.SetHeaderValue("x-bolt-auth-prefix", prefix);
+  request.SetHeaderValue("user-agent", BoltConfig::userAgentPrefix + request.GetHeaderValue("user-agent"));
 
   // TODO: add this as a BoltConfig enum;
-  request.SetHeaderValue("X-Bolt-Passthrough-Read", "disable");
+  //   request.SetHeaderValue("x-Bolt-Passthrough-Read", "disable");
 
   std::cout << "Request Headers: \n";
   for (const auto& elem : request.GetHeaders()) {
