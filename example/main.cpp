@@ -4,13 +4,19 @@
 #include <aws/s3/model/ListObjectsRequest.h>
 #include <bolt_s3_client.h>
 #include <bolt_s3_config.h>
+#include <bolt_s3_http_client_factory.h>
 
 #include <iostream>
 
 using namespace Aws;
 
+static const char ALLOCATION_TAG[] = "BoltS3HttpClientFactory";
+
+std::shared_ptr<Aws::Http::HttpClientFactory> CreateFactory() { return Aws::MakeShared<ProjectN::Bolt::BoltS3HttpClientFactory>(ALLOCATION_TAG); }
+
 void ListObjects() {
   SDKOptions options;
+  options.httpOptions.httpClientFactory_create_fn = CreateFactory;
   options.loggingOptions.logLevel = Aws::Utils::Logging::LogLevel::Debug;
 
   std::string bucketName = "sdk-test-rvh";

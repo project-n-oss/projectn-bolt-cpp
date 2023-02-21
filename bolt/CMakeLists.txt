@@ -39,6 +39,8 @@ target_sources(
         src/bolt_s3_client.cpp
         src/bolt_s3_config.cpp
         src/bolt_s3_signer.cpp
+        src/bolt_s3_curl_client.cpp
+        src/bolt_s3_http_client_factory.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -58,6 +60,8 @@ set(
     include/bolt_s3_config.h
     include/bolt_s3_client.h
     include/bolt_s3_client_model.h
+    include/bolt_s3_http_client_factory.h
+    include/bolt_s3_curl_client.h
 )
 
 #Set the location of where Windows can find the installed libraries of the SDK.
@@ -87,6 +91,48 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     # compile options for this target only
     # treat warnings as errors
     target_compile_options(${PROJECT_NAME} PRIVATE -Werror)
+endif()
+
+include(ResolvePlatform)
+
+# Http client control
+if(NOT NO_HTTP_CLIENT)
+    message(STATUS ${PLATFORM_LINUX} ${PLATFORM_APPLE} "platform")
+    if(PLATFORM_WINDOWS)
+        if(FORCE_CURL)
+            set(ENABLE_CURL_CLIENT 1)
+        else()
+            set(ENABLE_WINDOWS_CLIENT 1)
+        endif()
+    elseif(PLATFORM_LINUX OR PLATFORM_APPLE OR PLATFORM_ANDROID)
+        set(ENABLE_CURL_CLIENT 1)
+    endif()
+
+    if(ENABLE_CURL_CLIENT)
+        add_definitions(-DENABLE_CURL_CLIENT)
+        message(STATUS "Http client: Curl")
+      
+        include(FindCURL)
+        if(NOT CURL_FOUND)
+            message(FATAL_ERROR "Could not find curl")
+        endif()
+    elseif(ENABLE_WINDOWS_CLIENT)
+        add_definitions(-DENABLE_WINDOWS_CLIENT)
+        if(USE_IXML_HTTP_REQUEST_2)
+            add_definitions(-DENABLE_WINDOWS_IXML_HTTP_REQUEST_2_CLIENT)
+            message(STATUS "Http client: IXmlHttpRequest2")
+            if(BYPASS_DEFAULT_PROXY)
+                add_definitions(-DBYPASS_DEFAULT_PROXY)
+                message(STATUS "Proxy bypass is enabled via WinHttp")
+            endif()
+        else()
+            message(STATUS "Http client: WinHttp")
+        endif()
+    else()
+        message(FATAL_ERROR "No http client available for target platform and client injection not enabled (-DNO_HTTP_CLIENT=ON)")
+    endif()
+else()
+    message(STATUS "You will need to inject an http client implementation before making any http requests!")
 endif()
 
 include(InstallingGeneral)

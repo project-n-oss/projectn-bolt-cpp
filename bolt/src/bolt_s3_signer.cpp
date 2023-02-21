@@ -5,6 +5,7 @@
 #include <aws/core/http/standard/StandardHttpRequest.h>
 
 #include "bolt_s3_config.h"
+#include "bolt_s3_curl_client.h"
 
 std::vector<std::string> splitString(std::string str, const char splitter) {
   std::vector<std::string> result;
@@ -96,7 +97,9 @@ bool BoltSigner::SignRequest(Aws::Http::HttpRequest& request, const char* region
     request.SetHeaderValue("x-amz-content-sha256", iamHeaders.at("x-amz-content-sha256"));
   }
 
-  request.SetHeaderValue("Host", BoltConfig::boltHostName);
+  //   request.SetHeaderValue("Host", BoltConfig::boltHostName);
+  BoltCurlHttpClient::selectedBoltEndpoint = boltURI.GetPath();
+
   request.SetHeaderValue("X-Bolt-Auth-Prefix", prefix);
   request.SetHeaderValue("User-Agent", BoltConfig::userAgentPrefix + request.GetHeaderValue("User-Agent"));
 
