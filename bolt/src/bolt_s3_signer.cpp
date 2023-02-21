@@ -58,22 +58,38 @@ bool BoltSigner::SignRequest(Aws::Http::HttpRequest& request, const char* region
   request.GetUri() = boltURI;
 
   Aws::Http::Standard::StandardHttpRequest headRequest(Aws::Http::URI(headObjectURL), Aws::Http::HttpMethod::HTTP_HEAD);
+  if (request.GetHeaders().count("x-amz-security-token")) {
+    headRequest.SetHeaderValue("x-amz-security-token", request.GetHeaders().at("x-amz-security-token"));
+  }
   headRequest.SetHeaderValue("X-Amz-Content-Sha256", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+
+  // Path: /sdk-test-rvh
+  // Source Bucket: n-auth-dummy
+  // Bolt Uri: http://10.196.135.232
+  // Head Object URL: https://s3.us-east-2.amazonaws.com/n-auth-dummy/owfr/auth
+  // request Uri: http://10.196.135.232
+
+  std::cout << "Path: " << path << "\n";
+  std::cout << "Source Bucket: " << sourceBucket << "\n";
+  std::cout << "Bolt Uri: " << boltURI.GetURIString() << "\n";
+  std::cout << "Head Object URL: " << headObjectURL << "\n";
+  std::cout << "request Uri: " << request.GetUri().GetURIString() << "\n";
+  std::cout << "\n";
 
   this->m_v4Signer->SignRequest(headRequest, region, serviceName, signBody);
 
   Aws::Map<Aws::String, Aws::String> iamHeaders = headRequest.GetHeaders();
 
-  if (iamHeaders.count("X-Amz-Security-Token")) {
-    request.SetHeaderValue("X-Amz-Security-Token", iamHeaders.at("X-Amz-Security-Token"));
+  if (iamHeaders.count("x-amz-security-token")) {
+    request.SetHeaderValue("x-amz-security-token", iamHeaders.at("x-amz-security-token"));
   }
 
-  if (iamHeaders.count("X-Amz-Date")) {
-    request.SetHeaderValue("X-Amz-Date", iamHeaders.at("X-Amz-Date"));
+  if (iamHeaders.count("x-amz-date")) {
+    request.SetHeaderValue("x-amz-date", iamHeaders.at("x-amz-date"));
   }
 
-  if (iamHeaders.count("Authorization")) {
-    request.SetHeaderValue("Authorization", iamHeaders.at("Authorization"));
+  if (iamHeaders.count("authorization")) {
+    request.SetHeaderValue("authorization", iamHeaders.at("authorization"));
   }
 
   if (iamHeaders.count("x-amz-content-sha256")) {
@@ -84,6 +100,15 @@ bool BoltSigner::SignRequest(Aws::Http::HttpRequest& request, const char* region
   request.SetHeaderValue("X-Bolt-Auth-Prefix", prefix);
   request.SetHeaderValue("User-Agent", BoltConfig::userAgentPrefix + request.GetHeaderValue("User-Agent"));
 
+  // TODO: add this as a BoltConfig enum;
+  request.SetHeaderValue("X-Bolt-Passthrough-Read", "disable");
+
+  std::cout << "Request Headers: \n";
+  for (const auto& elem : request.GetHeaders()) {
+    std::cout << elem.first << ": " << elem.second << "\n";
+  }
+  std::cout << "\n";
+
   return true;
 }
 
@@ -92,6 +117,7 @@ bool BoltSigner::PresignRequest(Aws::Http::HttpRequest& request, long long expir
 bool BoltSigner::PresignRequest(Aws::Http::HttpRequest& request, const char* region, long long expirationInSeconds) const { return PresignRequest(request, region, m_serviceName.c_str(), expirationInSeconds); }
 
 bool BoltSigner::PresignRequest(Aws::Http::HttpRequest& request, const char* region, const char* serviceName, long long expirationTimeInSeconds) const {
+  std::cout << " PRESIGN \n";
   Aws::Http::URI boltURI = BoltConfig::SelectBoltEndpoints(request.GetMethod());
   Aws::String path = request.GetUri().GetPath();
   Aws::String sourceBucket = splitString(path, '/').size() > 1 ? splitString(path, '/')[1] : "n-auth-dummy";

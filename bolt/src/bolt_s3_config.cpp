@@ -87,7 +87,9 @@ Aws::Http::URI BoltConfig::SelectBoltEndpoints(const Aws::Http::HttpMethod& http
       std::vector<std::string> value = pos->second;
       if (value.size() > 0) {
         auto selectedEndpoint = value.at(rand() % value.size());
-        return Aws::Http::URI(selectedEndpoint);
+        auto uri = Aws::Http::URI(selectedEndpoint);
+        uri.SetScheme(Aws::Http::Scheme::HTTPS);
+        return uri;
       }
     }
   }

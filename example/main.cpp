@@ -1,6 +1,7 @@
 #include <aws/core/Aws.h>
 #include <aws/core/utils/memory/stl/AWSAllocator.h>
 #include <aws/s3/S3Client.h>
+#include <aws/s3/model/ListObjectsRequest.h>
 #include <bolt_s3_client.h>
 #include <bolt_s3_config.h>
 
@@ -8,12 +9,14 @@
 
 using namespace Aws;
 
-void ListBuckets() {
+void ListObjects() {
   SDKOptions options;
   options.loggingOptions.logLevel = Aws::Utils::Logging::LogLevel::Debug;
 
-  ProjectN::Bolt::BoltConfig::region = "us-east-1";
-  ProjectN::Bolt::BoltConfig::customDomain = "example.com";
+  std::string bucketName = "sdk-test-rvh";
+
+  ProjectN::Bolt::BoltConfig::region = "us-east-2";
+  ProjectN::Bolt::BoltConfig::customDomain = "rvh.bolt.projectn.co";
   ProjectN::Bolt::BoltConfig::Reset();
 
   InitAPI(options);
@@ -21,14 +24,19 @@ void ListBuckets() {
     ProjectN::Bolt::BoltS3Client client;
     // Aws::S3::S3Client client;
 
-    auto outcome = client.ListBuckets();
-    if (outcome.IsSuccess()) {
-      std::cout << "Found " << outcome.GetResult().GetBuckets().size() << " buckets\n";
-      for (auto&& b : outcome.GetResult().GetBuckets()) {
-        std::cout << b.GetName() << std::endl;
-      }
+    Aws::S3::Model::ListObjectsRequest request;
+    request.WithBucket(bucketName);
+
+    auto outcome = client.ListObjects(request);
+
+    if (!outcome.IsSuccess()) {
+      std::cerr << "Error: ListObjects: " << outcome.GetError().GetMessage() << std::endl;
     } else {
-      std::cout << "Failed with error: " << outcome.GetError() << std::endl;
+      Aws::Vector<Aws::S3::Model::Object> objects = outcome.GetResult().GetContents();
+
+      for (Aws::S3::Model::Object &object : objects) {
+        std::cout << object.GetKey() << std::endl;
+      }
     }
   }
 
@@ -37,6 +45,6 @@ void ListBuckets() {
 }
 
 int main() {
-  ListBuckets();
+  ListObjects();
   return 0;
 }
