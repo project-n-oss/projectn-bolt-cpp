@@ -4,11 +4,11 @@ build_type_flag='Release'
 target_flag='all'
 
 
-while getopts 'dr' flag; do
+while getopts 'dri' flag; do
     case "${flag}" in
         d) build_type_flag='Debug' ;;
         r) build_type_flag='Release' ;;
-        i) target="install" ;; 
+        i) target_flag="install" ;; 
     esac
 done
 
