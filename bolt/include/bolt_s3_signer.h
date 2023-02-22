@@ -2,6 +2,7 @@
 #define BOLT_S3_SIGNER_H
 
 #include <aws/core/auth/signer/AWSAuthV4Signer.h>
+#include <aws/core/http/standard/StandardHttpRequest.h>
 
 namespace ProjectN {
 namespace Bolt {
@@ -89,9 +90,9 @@ class BoltSigner : public Aws::Client::AWSAuthSigner {
   const Aws::String m_serviceName;
   const Aws::String m_region;
 
-  Aws::Http::HttpRequest CreateHeadRequest(Aws::Http::HttpRequest& request);
+  Aws::Http::Standard::StandardHttpRequest CreateBoltHeadRequest(Aws::Http::HttpRequest& request, Aws::Http::URI boltURI, Aws::String prefix) const;
 
-  bool BoltSignRequest();
+  bool SignBoltRequest(Aws::Http::HttpRequest& request, Aws::Http::HttpRequest& headRequest, Aws::Http::URI boltURI, Aws::String prefix) const;
 };
 
 }  // namespace Bolt

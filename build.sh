@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-build_type_flag='Debug'
+build_type_flag='Release'
 target_flag='all'
 
 
