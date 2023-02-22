@@ -1,6 +1,8 @@
 name: Release
-on:
-  workflow_dispatch:
+on: 
+  push:
+    tags:
+    - '*'
 
 jobs:
   release-build:
@@ -20,10 +22,7 @@ jobs:
 
     - uses: ncipollo/release-action@v1
       with:
-        tag: ${{ env.VERSION }}
         artifacts: ${{github.workspace}}/artifact/*.zip
         allowUpdates: true
-        commit: ${{ github.sha }}
-
 
       
