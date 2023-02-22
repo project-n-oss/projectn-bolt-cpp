@@ -40,8 +40,9 @@ void ListObjects() {
     } else {
       Aws::Vector<Aws::S3::Model::Object> objects = outcome.GetResult().GetContents();
 
+      std::cout << "Objects in " << bucketName << ":" << std::endl;
       for (Aws::S3::Model::Object &object : objects) {
-        std::cout << object.GetKey() << std::endl;
+        std::cout << "\t- " << object.GetKey() << std::endl;
       }
     }
   }

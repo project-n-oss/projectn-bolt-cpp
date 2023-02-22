@@ -32,7 +32,7 @@ std::string BoltConfig::customDomain = GetEnvVar("BOLT_CUSTOM_DOMAIN");
 std::string BoltConfig::authBucket = GetEnvVar("BOLT_AUTH_BUCKET");
 std::string BoltConfig::userAgentPrefix = GetEnvVar("USER_AGENT_PREFIX") == std::string() ? "projectn/" : GetEnvVar("USER_AGENT_PREFIX");
 std::string BoltConfig::boltHostName = "bolt." + BoltConfig::region + "." + BoltConfig::customDomain;
-bool BoltConfig::disablePassThroughRead = false;
+bool BoltConfig::disablePassThroughRead = true;
 
 std::chrono::time_point<std::chrono::system_clock> BoltConfig::refreshTime = std::chrono::system_clock::now() + std::chrono::seconds(120);
 BoltEndpoints BoltConfig::boltEndpoints = {};

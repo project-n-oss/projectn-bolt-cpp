@@ -18,6 +18,39 @@ You can also build the projectn library from [source](#building-from-source).
 
 You can look at the [./example](./example) folder to see how to use our library with your app.
 
+**Configure Bolt custom domain and httpClientFactory**
+
+You must set Bolt custom domain through environment variable `BOLT_CUSTOM_DOMAIN` or through code (see [./example/main.cpp](./example/main.cpp)):
+
+```c++
+ProjectN::Bolt::BoltConfig::customDomain = "rvh.bolt.projectn.co";
+ProjectN::Bolt::BoltConfig::Reset();
+```
+
+You must also set the `httpClientFactory_create_fn` option in the aws `SDKOptions` struct like so (see [./example/main.cpp](./example/main.cpp)): 
+
+```c++
+SDKOptions options;
+options.httpOptions.httpClientFactory_create_fn = []() { return Aws::MakeShared<ProjectN::Bolt::BoltS3HttpClientFactory>(ALLOCATION_TAG); };
+```
+
+**Configure preferred region and availability zone:**
+
+If running on an EC2 instance the SDK will use that instance's region and availability zone by default
+
+If you want a specific region you can set with the environment variable `AWS_REGION`
+
+If you want a specific availability zone you can set it with the a environment variable `AWS_ZONE_ID`.
+
+You can also set those values in your code:
+
+```c++
+ProjectN::Bolt::BoltConfig::region = "us-east-2";
+ProjectN::Bolt::BoltConfig::zoneId = "use1‑az2";
+ProjectN::Bolt::BoltConfig::customDomain = "example.com";
+ProjectN::Bolt::BoltConfig::Reset();
+```
+
 ## Building from source
 
 You can build this C++ library from source using the [./build.sh](./build.sh) bash script.

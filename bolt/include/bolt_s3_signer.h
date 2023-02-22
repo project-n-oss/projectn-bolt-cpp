@@ -92,7 +92,7 @@ class BoltSigner : public Aws::Client::AWSAuthSigner {
 
   Aws::Http::Standard::StandardHttpRequest CreateBoltHeadRequest(Aws::Http::HttpRequest& request, Aws::Http::URI boltURI, Aws::String prefix) const;
 
-  bool SignBoltRequest(Aws::Http::HttpRequest& request, Aws::Http::HttpRequest& headRequest, Aws::Http::URI boltURI, Aws::String prefix) const;
+  bool SignBoltRequest(Aws::Http::HttpRequest& request, Aws::Http::HeaderValueCollection signedHeaders, Aws::Http::URI boltURI, Aws::String prefix) const;
 };
 
 }  // namespace Bolt

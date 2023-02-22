@@ -46,7 +46,7 @@ BoltSigner::~BoltSigner() {}
 
 Aws::Http::Standard::StandardHttpRequest BoltSigner::CreateBoltHeadRequest(Aws::Http::HttpRequest& request, Aws::Http::URI boltURI, Aws::String prefix) const {
   Aws::String path = request.GetUri().GetPath();
-  Aws::String sourceBucket = splitString(path, '/').size() > 1 ? splitString(path, '/')[1] : "n-auth-dummy";
+  Aws::String sourceBucket = splitString(path, '/').size() >= 1 ? splitString(path, '/')[0] : "n-auth-dummy";
 
   if (BoltConfig::authBucket != "") {
     sourceBucket = BoltConfig::authBucket;
@@ -54,74 +54,63 @@ Aws::Http::Standard::StandardHttpRequest BoltSigner::CreateBoltHeadRequest(Aws::
 
   Aws::String headObjectURL = "https://s3." + BoltConfig::region + ".amazonaws.com/" + sourceBucket + "/" + prefix + "/auth";
 
-  request.GetUri() = boltURI;
-
   Aws::Http::Standard::StandardHttpRequest headRequest(Aws::Http::URI(headObjectURL), Aws::Http::HttpMethod::HTTP_HEAD);
   if (request.GetHeaders().count("x-amz-security-token")) {
     headRequest.SetHeaderValue("x-amz-security-token", request.GetHeaders().at("x-amz-security-token"));
   }
-  headRequest.SetHeaderValue("X-Amz-Content-Sha256", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+  headRequest.SetHeaderValue("x-amz-content-sha256", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
 
-  //   std::cout << "Path: " << path << "\n";
-  //   std::cout << "Source Bucket: " << sourceBucket << "\n";
-  //   std::cout << "Bolt Uri: " << boltURI.GetURIString() << "\n";
-  //   std::cout << "Head Object URL: " << headObjectURL << "\n";
-  //   std::cout << "request Uri: " << request.GetUri().GetURIString() << "\n";
-  //   std::cout << "\n";
   return headRequest;
 };
 
-bool BoltSigner::SignBoltRequest(Aws::Http::HttpRequest& request, Aws::Http::HttpRequest& headRequest, Aws::Http::URI boltURI, Aws::String prefix) const {
-  Aws::Map<Aws::String, Aws::String> iamHeaders = headRequest.GetHeaders();
+bool BoltSigner::SignBoltRequest(Aws::Http::HttpRequest& request, Aws::Http::HeaderValueCollection signedHeaders, Aws::Http::URI boltURI, Aws::String prefix) const {
+  request.GetUri() = boltURI;
 
-  if (iamHeaders.count("x-amz-security-token")) {
-    request.SetHeaderValue("x-amz-security-token", iamHeaders.at("x-amz-security-token"));
+  if (signedHeaders.count("x-amz-security-token")) {
+    request.SetHeaderValue("x-amz-security-token", signedHeaders.at("x-amz-security-token"));
   }
 
-  if (iamHeaders.count("x-amz-date")) {
-    request.SetHeaderValue("x-amz-date", iamHeaders.at("x-amz-date"));
+  if (signedHeaders.count("x-amz-date")) {
+    request.SetHeaderValue("x-amz-date", signedHeaders.at("x-amz-date"));
   }
 
-  if (iamHeaders.count("authorization")) {
-    request.SetHeaderValue("authorization", iamHeaders.at("authorization"));
+  if (signedHeaders.count("authorization")) {
+    request.SetHeaderValue("authorization", signedHeaders.at("authorization"));
   }
 
-  if (iamHeaders.count("x-amz-content-sha256")) {
-    request.SetHeaderValue("x-amz-content-sha256", iamHeaders.at("x-amz-content-sha256"));
+  if (signedHeaders.count("x-amz-content-sha256")) {
+    request.SetHeaderValue("x-amz-content-sha256", signedHeaders.at("x-amz-content-sha256"));
   }
 
-  // Sets bolt enptoint for curl resolve option in bolt_s3_curl_client.cpp.
+  // Sets bolt endpoint for curl resolve option in bolt_s3_curl_client.cpp.
   // Same as setting the "Host" header, but curl needs special option to be set.
   // This is needed to resolve SSL certificate from Bolt.
   BoltCurlHttpClient::selectedBoltEndpoint = boltURI;
-  std::cout << "GET AUTHORITY: " << boltURI.GetAuthority() << " | " << BoltCurlHttpClient::selectedBoltEndpoint.GetAuthority() << "\n";
 
   request.SetHeaderValue("host", BoltConfig::boltHostName);
   request.SetHeaderValue("x-bolt-auth-prefix", prefix);
   request.SetHeaderValue("user-agent", BoltConfig::userAgentPrefix + request.GetHeaderValue("user-agent"));
 
   if (BoltConfig::disablePassThroughRead) {
-    request.SetHeaderValue("x-Bolt-Passthrough-Read", "disable");
+    request.SetHeaderValue("x-bolt-passthrough-Read", "disable");
   }
-
-  std::cout << "Request Headers: \n";
-  for (const auto& elem : request.GetHeaders()) {
-    std::cout << elem.first << ": " << elem.second << "\n";
-  }
-  std::cout << "\n";
 
   return true;
 }
 
 bool BoltSigner::SignRequest(Aws::Http::HttpRequest& request, const char* region, const char* serviceName, bool signBody) const {
-  Aws::Http::URI boltURI = BoltConfig::SelectBoltEndpoints(request.GetMethod());
+  Aws::Http::URI boltURI = request.GetUri();
+  Aws::Http::URI boltEndpoint = BoltConfig::SelectBoltEndpoints(request.GetMethod());
+  boltURI.SetAuthority(boltEndpoint.GetAuthority());
+
   Aws::String prefix = getRandomString();
 
   Aws::Http::Standard::StandardHttpRequest headRequest = CreateBoltHeadRequest(request, boltURI, prefix);
 
-  this->m_v4Signer->SignRequest(headRequest, region, serviceName, signBody);
+  // TODO: skew clock for bolt cache
+  this->m_v4Signer->SignRequest(headRequest, region, serviceName, true);
 
-  return SignBoltRequest(request, headRequest, boltURI, prefix);
+  return SignBoltRequest(request, headRequest.GetHeaders(), boltURI, prefix);
 }
 
 bool BoltSigner::PresignRequest(Aws::Http::HttpRequest& request, long long expirationTimeInSeconds) const { return PresignRequest(request, m_region.c_str(), expirationTimeInSeconds); }
@@ -129,14 +118,16 @@ bool BoltSigner::PresignRequest(Aws::Http::HttpRequest& request, long long expir
 bool BoltSigner::PresignRequest(Aws::Http::HttpRequest& request, const char* region, long long expirationInSeconds) const { return PresignRequest(request, region, m_serviceName.c_str(), expirationInSeconds); }
 
 bool BoltSigner::PresignRequest(Aws::Http::HttpRequest& request, const char* region, const char* serviceName, long long expirationTimeInSeconds) const {
-  Aws::Http::URI boltURI = BoltConfig::SelectBoltEndpoints(request.GetMethod());
+  Aws::Http::URI boltURI = request.GetUri();
+  Aws::Http::URI boltEndpoint = BoltConfig::SelectBoltEndpoints(request.GetMethod());
+  boltURI.SetAuthority(boltEndpoint.GetAuthority());
   Aws::String prefix = getRandomString();
 
   Aws::Http::Standard::StandardHttpRequest headRequest = CreateBoltHeadRequest(request, boltURI, prefix);
 
   this->m_v4Signer->PresignRequest(headRequest, region, serviceName, expirationTimeInSeconds);
 
-  return SignBoltRequest(request, headRequest, boltURI, prefix);
+  return SignBoltRequest(request, headRequest.GetHeaders(), boltURI, prefix);
 }
 
 }  // namespace Bolt
