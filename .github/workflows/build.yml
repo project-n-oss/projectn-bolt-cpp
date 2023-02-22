@@ -53,6 +53,7 @@ jobs:
 
       - uses: actions/cache/save@v3
         id: cache-save
+        if: steps.cache.outputs.cache-hit != 'true'
         with:
           path: ${{github.workspace}}/sdk_build
           key: ${{ runner.os }}-aws-sdk-cpp-commit-${{ env.AWS_COMMIT_HASH }}
