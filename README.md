@@ -103,4 +103,4 @@ We follow the same release versioning as aws-sdk-cpp.
 ### Steps
 
 1. run `./update_version.sh` and give the aws-sdk-cpp version you want to update too. (This will checkout the correct version of the aws-sdk-cpp submodule and update the projectn cmake project to the same version)
-2. git commit/push and run the `Release` Action on github
+2. run `./git_tag.sh` to tag the latest commit to the aws-version and trigger the release action.
