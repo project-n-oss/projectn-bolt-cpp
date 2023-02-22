@@ -23,6 +23,7 @@ class BoltConfig {
   static std::string authBucket;
   static std::string userAgentPrefix;
   static std::string boltHostName;
+  static bool disablePassThroughRead;
 
   static Aws::Http::URI SelectBoltEndpoints(const Aws::Http::HttpMethod& httpRequestMethod);
   static void Reset();

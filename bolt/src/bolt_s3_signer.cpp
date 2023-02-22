@@ -44,8 +44,9 @@ BoltSigner::BoltSigner(const std::shared_ptr<Aws::Auth::AWSCredentialsProvider>&
 
 BoltSigner::~BoltSigner() {}
 
-bool BoltSigner::SignRequest(Aws::Http::HttpRequest& request, const char* region, const char* serviceName, bool signBody) const {
+Aws::Http::HttpRequest BoltSigner::CreateHeadRequest(Aws::Http::HttpRequest& request) {
   Aws::Http::URI boltURI = BoltConfig::SelectBoltEndpoints(request.GetMethod());
+  BoltCurlHttpClient::selectedBoltEndpoint = boltURI;
   Aws::String path = request.GetUri().GetPath();
   Aws::String sourceBucket = splitString(path, '/').size() > 1 ? splitString(path, '/')[1] : "n-auth-dummy";
 
@@ -64,11 +65,35 @@ bool BoltSigner::SignRequest(Aws::Http::HttpRequest& request, const char* region
   }
   headRequest.SetHeaderValue("X-Amz-Content-Sha256", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
 
-  // Path: /sdk-test-rvh
-  // Source Bucket: n-auth-dummy
-  // Bolt Uri: http://10.196.135.232
-  // Head Object URL: https://s3.us-east-2.amazonaws.com/n-auth-dummy/owfr/auth
-  // request Uri: http://10.196.135.232
+  //   std::cout << "Path: " << path << "\n";
+  //   std::cout << "Source Bucket: " << sourceBucket << "\n";
+  //   std::cout << "Bolt Uri: " << boltURI.GetURIString() << "\n";
+  //   std::cout << "Head Object URL: " << headObjectURL << "\n";
+  //   std::cout << "request Uri: " << request.GetUri().GetURIString() << "\n";
+  //   std::cout << "\n";
+  return headRequest;
+};
+
+bool BoltSigner::SignRequest(Aws::Http::HttpRequest& request, const char* region, const char* serviceName, bool signBody) const {
+  //   Aws::Http::URI boltURI = BoltConfig::SelectBoltEndpoints(request.GetMethod());
+  //   BoltCurlHttpClient::selectedBoltEndpoint = boltURI;
+  //   Aws::String path = request.GetUri().GetPath();
+  //   Aws::String sourceBucket = splitString(path, '/').size() > 1 ? splitString(path, '/')[1] : "n-auth-dummy";
+
+  //   if (BoltConfig::authBucket != "") {
+  //     sourceBucket = BoltConfig::authBucket;
+  //   }
+
+  //   Aws::String prefix = getRandomString();
+  //   Aws::String headObjectURL = "https://s3." + BoltConfig::region + ".amazonaws.com/" + sourceBucket + "/" + prefix + "/auth";
+
+  //   request.GetUri() = boltURI;
+
+  //   Aws::Http::Standard::StandardHttpRequest headRequest(Aws::Http::URI(headObjectURL), Aws::Http::HttpMethod::HTTP_HEAD);
+  //   if (request.GetHeaders().count("x-amz-security-token")) {
+  //     headRequest.SetHeaderValue("x-amz-security-token", request.GetHeaders().at("x-amz-security-token"));
+  //   }
+  //   headRequest.SetHeaderValue("X-Amz-Content-Sha256", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
 
   //   std::cout << "Path: " << path << "\n";
   //   std::cout << "Source Bucket: " << sourceBucket << "\n";
@@ -77,7 +102,9 @@ bool BoltSigner::SignRequest(Aws::Http::HttpRequest& request, const char* region
   //   std::cout << "request Uri: " << request.GetUri().GetURIString() << "\n";
   //   std::cout << "\n";
 
-  this->m_v4Signer->SignRequest(headRequest, region, serviceName, signBody);
+  Aws::Http::HttpRequest headRequest = this->CreateHeadRequest(request);
+
+      this->m_v4Signer->SignRequest(headRequest, region, serviceName, signBody);
 
   Aws::Map<Aws::String, Aws::String> iamHeaders = headRequest.GetHeaders();
 
@@ -104,8 +131,9 @@ bool BoltSigner::SignRequest(Aws::Http::HttpRequest& request, const char* region
   request.SetHeaderValue("x-bolt-auth-prefix", prefix);
   request.SetHeaderValue("user-agent", BoltConfig::userAgentPrefix + request.GetHeaderValue("user-agent"));
 
-  // TODO: add this as a BoltConfig enum;
-  //   request.SetHeaderValue("x-Bolt-Passthrough-Read", "disable");
+  if (BoltConfig::disablePassThroughRead) {
+    request.SetHeaderValue("x-Bolt-Passthrough-Read", "disable");
+  }
 
   std::cout << "Request Headers: \n";
   for (const auto& elem : request.GetHeaders()) {

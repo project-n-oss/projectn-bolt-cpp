@@ -88,6 +88,10 @@ class BoltSigner : public Aws::Client::AWSAuthSigner {
   std::shared_ptr<Aws::Client::AWSAuthV4Signer> m_v4Signer;
   const Aws::String m_serviceName;
   const Aws::String m_region;
+
+  Aws::Http::HttpRequest CreateHeadRequest(Aws::Http::HttpRequest& request);
+
+  bool BoltSignRequest();
 };
 
 }  // namespace Bolt
