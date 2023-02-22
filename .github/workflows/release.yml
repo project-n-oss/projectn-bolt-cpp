@@ -22,6 +22,7 @@ jobs:
       with:
         tag: ${{ env.VERSION }}
         artifacts: ${{github.workspace}}/artifact/*.zip
+        allowUpdates: true
 
 
       
