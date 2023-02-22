@@ -108,7 +108,7 @@ bool BoltSigner::SignRequest(Aws::Http::HttpRequest& request, const char* region
   Aws::Http::Standard::StandardHttpRequest headRequest = CreateBoltHeadRequest(request, boltURI, prefix);
 
   // TODO: skew clock for bolt cache
-  this->m_v4Signer->SignRequest(headRequest, region, serviceName, true);
+  this->m_v4Signer->SignRequest(headRequest, region, serviceName, signBody);
 
   return SignBoltRequest(request, headRequest.GetHeaders(), boltURI, prefix);
 }
