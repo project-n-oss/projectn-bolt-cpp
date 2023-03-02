@@ -6,8 +6,8 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 set(OWN_VERSION 1.0.0)
 if(DEFINED CMAKE_PROJECT_VERSION AND NOT "${CMAKE_PROJECT_VERSION}" STREQUAL "")
     set(OWN_VERSION ${CMAKE_PROJECT_VERSION})
-else
-    message( FATAL_ERROR "Cannot find cmake project version" )
+else()
+    message(FATAL_ERROR "Cannot find cmake project version")
 endif()
 
 project(
