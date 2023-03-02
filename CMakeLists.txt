@@ -19,8 +19,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # for clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+message(STATUS "CMAKE_MODULE_PATYH: ${CMAKE_MODULE_PATH}")
+
 add_subdirectory(bolt)
 add_subdirectory(example)
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 include(Packing)
