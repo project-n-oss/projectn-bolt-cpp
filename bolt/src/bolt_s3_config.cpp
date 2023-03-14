@@ -41,11 +41,11 @@ const std::vector<std::string> BoltConfig::readOrderEndpoints = {"main_read_endp
 const std::vector<std::string> BoltConfig::writeOrderEndpoints = {"main_write_endpoints", "failover_write_endpoints"};
 
 void BoltConfig::Reset() {
-  if (BoltConfig::region != std::string()) {
+  if (BoltConfig::region == std::string()) {
     BoltConfig::region = Aws::Internal::EC2MetadataClient().GetCurrentRegion();
   }
 
-  if (BoltConfig::zoneId != std::string()) {
+  if (BoltConfig::zoneId == std::string()) {
     BoltConfig::zoneId = Aws::Internal::EC2MetadataClient().GetResource("/latest/meta-data/placement/availability-zone-id");
   }
 
