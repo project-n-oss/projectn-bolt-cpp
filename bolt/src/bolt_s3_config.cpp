@@ -11,13 +11,13 @@
 
 using json = nlohmann::json;
 
+namespace ProjectN {
+namespace Bolt {
+
 std::string GetEnvVar(std::string const& key) {
   char const* val = getenv(key.c_str());
   return val == NULL ? std::string() : std::string(val);
 }
-
-namespace ProjectN {
-namespace Bolt {
 
 std::string CreateQuicksilverUrl() {
   std::string zoneId = BoltConfig::zoneId == std::string() ? "" : "?az=" + BoltConfig::zoneId;
