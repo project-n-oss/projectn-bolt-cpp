@@ -113,6 +113,8 @@
 #include <aws/s3/model/UploadPartRequest.h>
 #include <aws/s3/model/WriteGetObjectResponseRequest.h>
 
+#include "bolt_s3_config.h"
+
 using namespace Aws;
 using namespace Aws::Auth;
 using namespace Aws::Client;
@@ -204,6 +206,7 @@ BoltS3Client::~BoltS3Client() {}
 std::shared_ptr<S3EndpointProviderBase>& BoltS3Client::accessEndpointProvider() { return m_endpointProvider; }
 
 void BoltS3Client::init(const S3::S3ClientConfiguration& config) {
+  BoltConfig::Reset();
   AWSClient::SetServiceClientName("BoltS3");
   AWS_CHECK_PTR(SERVICE_NAME, m_endpointProvider);
   m_endpointProvider->InitBuiltInParameters(config);

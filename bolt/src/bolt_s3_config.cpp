@@ -45,6 +45,12 @@ const std::vector<std::string> BoltConfig::writeOrderEndpoints = {"main_write_en
 void BoltConfig::Reset() {
   BoltConfig::quicksilverUrl = CreateQuicksilverUrl();
   BoltConfig::boltHostName = "bolt." + BoltConfig::region + "." + BoltConfig::customDomain;
+
+  std::string region = Aws::Internal::EC2MetadataClient().GetCurrentRegion();
+  std::string zoneId = Aws::Internal::EC2MetadataClient().GetResource("placement/availability-zone-id");
+
+  BoltConfig::region = region;
+  BoltConfig::zoneId = zoneId;
 }
 
 BoltEndpoints BoltConfig::ExecuteRequest(const std::string& get_url) {

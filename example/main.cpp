@@ -23,7 +23,6 @@ void ListObjects() {
 
   ProjectN::Bolt::BoltConfig::region = "us-east-2";
   ProjectN::Bolt::BoltConfig::customDomain = "rvh.bolt.projectn.co";
-  ProjectN::Bolt::BoltConfig::Reset();
 
   InitAPI(options);
   {
