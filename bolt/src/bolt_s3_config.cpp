@@ -24,8 +24,6 @@ std::string CreateQuicksilverUrl() {
   return "https://quicksilver." + BoltConfig::region + "." + BoltConfig::customDomain + "/services/bolt" + zoneId;
 }
 
-// std::string BoltConfig::region = GetEnvVar("AWS_REGION") == std::string() ? Aws::Internal::EC2MetadataClient().GetCurrentRegion() : GetEnvVar("AWS_REGION");
-// std::string BoltConfig::zoneId = GetEnvVar("AWS_ZONE_ID") == std::string() ? Aws::Internal::EC2MetadataClient().GetResource("/placement/availability-zone-id") : GetEnvVar("AWS_ZONE_ID");
 std::string BoltConfig::region = GetEnvVar("AWS_REGION");
 std::string BoltConfig::zoneId = GetEnvVar("AWS_ZONE_ID");
 std::string BoltConfig::customDomain = GetEnvVar("BOLT_CUSTOM_DOMAIN");
@@ -43,14 +41,16 @@ const std::vector<std::string> BoltConfig::readOrderEndpoints = {"main_read_endp
 const std::vector<std::string> BoltConfig::writeOrderEndpoints = {"main_write_endpoints", "failover_write_endpoints"};
 
 void BoltConfig::Reset() {
+  if (BoltConfig::region != std::string()) {
+    BoltConfig::region = Aws::Internal::EC2MetadataClient().GetCurrentRegion();
+  }
+
+  if (BoltConfig::zoneId != std::string()) {
+    BoltConfig::zoneId = Aws::Internal::EC2MetadataClient().GetResource("/latest/meta-data/placement/availability-zone-id");
+  }
+
   BoltConfig::quicksilverUrl = CreateQuicksilverUrl();
   BoltConfig::boltHostName = "bolt." + BoltConfig::region + "." + BoltConfig::customDomain;
-
-  std::string region = Aws::Internal::EC2MetadataClient().GetCurrentRegion();
-  std::string zoneId = Aws::Internal::EC2MetadataClient().GetResource("placement/availability-zone-id");
-
-  BoltConfig::region = region;
-  BoltConfig::zoneId = zoneId;
 }
 
 BoltEndpoints BoltConfig::ExecuteRequest(const std::string& get_url) {

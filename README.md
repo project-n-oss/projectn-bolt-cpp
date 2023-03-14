@@ -23,8 +23,7 @@ You can look at the [./example](./example) folder to see how to use our library 
 You must set Bolt custom domain through environment variable `BOLT_CUSTOM_DOMAIN` or through code (see [./example/main.cpp](./example/main.cpp)):
 
 ```c++
-ProjectN::Bolt::BoltConfig::customDomain = "rvh.bolt.projectn.co";
-ProjectN::Bolt::BoltConfig::Reset();
+ProjectN::Bolt::BoltConfig::customDomain = "example.bolt.projectn.co";
 ```
 
 You must also set the `httpClientFactory_create_fn` option in the aws `SDKOptions` struct like so (see [./example/main.cpp](./example/main.cpp)): 
@@ -48,7 +47,6 @@ You can also set those values in your code:
 ProjectN::Bolt::BoltConfig::region = "us-east-2";
 ProjectN::Bolt::BoltConfig::zoneId = "use1‑az2";
 ProjectN::Bolt::BoltConfig::customDomain = "example.com";
-ProjectN::Bolt::BoltConfig::Reset();
 ```
 
 ## Building from source

@@ -21,7 +21,6 @@ void ListObjects() {
 
   std::string bucketName = "sdk-test-rvh";
 
-  ProjectN::Bolt::BoltConfig::region = "us-east-2";
   ProjectN::Bolt::BoltConfig::customDomain = "rvh.bolt.projectn.co";
 
   InitAPI(options);
